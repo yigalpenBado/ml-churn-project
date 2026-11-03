@@ -29,6 +29,14 @@ def test_model_info():
 
     assert response.status_code == 200
 
+payload2 = {
+        "age": 35,
+        "anciennete": 5,
+        "revenu": 450000,
+        "nb_reclamations": 2,
+        "montant_mensuel": 25000,
+        "retards_paiement": 2
+}
 # test de l'endpoint /predict pour le post d'une prédiction
 def test_prediction():
 # Initialisation du payload avec des données de test pour un client
@@ -53,3 +61,22 @@ def test_prediction():
     assert "prediction" in data
     assert "probability" in data
     assert "model_version" in data
+
+# Modification du test pour verifier que la probabilité est comprise entre 0 et 1
+def test_prediction_probability_range(payload=payload2):
+
+    response = client.post(
+        "/predict",
+        json=payload
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert "prediction" in data
+    assert "probability" in data
+    assert "model_version" in data
+    assert 0 <= data["probability"] <= 1
+
+test_prediction_probability_range(payload2)
