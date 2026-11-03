@@ -1,0 +1,9 @@
+#definition des services dans le fichier docker-compose.yml
+#ici nous ne disposons que d'un seul service, l'API, qui sera construite à partir du Dockerfile présent dans le répertoire courant.
+services:
+  api:
+    build: .
+    container_name: ml-churn-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
