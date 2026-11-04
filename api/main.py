@@ -13,7 +13,7 @@ app = FastAPI(
 MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "model.pkl"
 model = joblib.load(MODEL_PATH)
 
-
+# Initialisation de la classe ClientData pour la validation des données d'entrée
 class ClientData(BaseModel):
     age: int
     anciennete: int
@@ -79,5 +79,5 @@ def predict(data: ClientData):
         "duration_ms": round(duration * 1000, 2)
     }
 
-
+# Instrumentation for Prometheus monitoring
 Instrumentator().instrument(app).expose(app)
