@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
+import pandas as pd
 import time
 from pathlib import Path
 
@@ -12,6 +13,16 @@ app = FastAPI(
 )
 MODEL_PATH = Path(__file__).resolve().parent.parent / "models" / "model.pkl"
 model = joblib.load(MODEL_PATH)
+
+# Ordre des colonnes utilisé à l'entraînement
+FEATURES = [
+    "age",
+    "anciennete",
+    "revenu",
+    "nb_reclamations",
+    "montant_mensuel",
+    "retards_paiement",
+]
 
 # Initialisation de la classe ClientData pour la validation des données d'entrée
 class ClientData(BaseModel):
@@ -52,14 +63,8 @@ def predict(data: ClientData):
 
     start = time.time()
 
-    values = [[
-        data.age,
-        data.anciennete,
-        data.revenu,
-        data.nb_reclamations,
-        data.montant_mensuel,
-        data.retards_paiement
-    ]]
+    # DataFrame avec les mêmes noms de colonnes que lors de l'entraînement
+    values = pd.DataFrame([data.model_dump()])[FEATURES]
 
     prediction = model.predict(values)[0]
     probability = model.predict_proba(values)[0][1]

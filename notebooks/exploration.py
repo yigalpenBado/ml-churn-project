@@ -52,5 +52,4 @@ plt.savefig("../data/correlation.png")
 plt.show()
 # %% [markdown]
 # Nous ne constatons pas de corrélations très fortes entre les variables, 
-# mais certaines variables sont légèrement corrélées entre elles. 
 # %%
