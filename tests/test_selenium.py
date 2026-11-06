@@ -1,17 +1,17 @@
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
+from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 
-# def test_application():
+def test_application():
 
-#     driver = webdriver.Chrome()
+    driver = webdriver.Chrome()
 
-#     try:
+    try:
 
-#         driver.get("http://localhost:8000/docs")
+        driver.get("http://localhost:8000/docs")
 
-#         assert "FastAPI" in driver.title
+        assert "FastAPI" in driver.title
 
-#     finally:
+    finally:
 
-#         driver.quit()
+        driver.quit()
