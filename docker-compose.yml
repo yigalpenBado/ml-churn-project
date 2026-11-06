@@ -1,9 +1,69 @@
-#definition des services dans le fichier docker-compose.yml
-#ici nous ne disposons que d'un seul service, l'API, qui sera construite à partir du Dockerfile présent dans le répertoire courant.
+# Définition des services dans le fichier docker-compose.yml
+# Architecture d'observabilité :
+#   FastAPI --(logs JSON / TCP 5000)--> Logstash --> Elasticsearch --> Kibana
 services:
+  # API de prédiction, construite à partir du Dockerfile du répertoire courant
   api:
     build: .
     container_name: ml-churn-api
     ports:
       - "8000:8000"
+    environment:
+      # Active l'envoi des logs vers Logstash (voir api/main.py)
+      - LOGSTASH_HOST=logstash
+      - LOGSTASH_PORT=5000
+    depends_on:
+      - logstash
     restart: unless-stopped
+
+  # Stockage et indexation des logs
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      # Sécurité désactivée pour simplifier le TP (ne pas faire en production)
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  # Réception, transformation et envoi des logs vers Elasticsearch
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.3
+    container_name: logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    environment:
+      - LS_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.monitoring.enabled=false
+    ports:
+      - "5000:5000"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Interface de recherche et de visualisation des logs
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  es-data:
