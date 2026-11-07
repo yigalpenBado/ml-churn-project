@@ -68,15 +68,15 @@ models = {
         random_state=42
     )
 }
-
+#%%
 results = {}
 ## Entraînement et évaluation des modèles
 for name, model in models.items():
 
     print(f"\nEntraînement : {name}")
-
+    # entrainement du modèle sur les données d'entraînement
     model.fit(X_train, y_train)
-
+    # prédiction sur les données de test
     predictions = model.predict(X_test)
 
     results[name] = {
@@ -87,11 +87,11 @@ for name, model in models.items():
     }
 
     print(results[name])
-
+#%%
 # Sélection du Random Forest pour la suite du TP
-##model = models["random_forest"]
+model = models["random_forest"]
 
-##joblib.dump(model, "models/model.pkl")
-
+#%%
+joblib.dump(model, "../models/model.pkl")
 print("\nModèle sauvegardé dans models/model.pkl")
 # %%

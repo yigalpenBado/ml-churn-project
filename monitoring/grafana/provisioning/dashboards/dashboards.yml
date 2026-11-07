@@ -1,0 +1,10 @@
+# Chargement automatique des dashboards JSON présents dans /var/lib/grafana/dashboards
+apiVersion: 1
+
+providers:
+  - name: ml-churn
+    folder: ML Churn
+    type: file
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
