@@ -6,11 +6,25 @@ import os
 import time
 from pathlib import Path
 
+from prometheus_client import Counter
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from api.logstash_handler import LogstashHandler
 
 MODEL_VERSION = "1.0.0"
+
+# Métriques métier exposées sur /metrics (en plus des métriques HTTP de base exposées par prometheus_fastapi_instrumentator)
+# La prediction est soit "CHURN" (1) soit "NO_CHURN" (0). On compte le nombre de prédictions réalisées et le nombre d'erreurs lors de la prédiction.
+PREDICTIONS_TOTAL = Counter(
+    "ml_predictions_total",
+    "Nombre de prédictions réalisées",
+    ["prediction", "model_version"]
+)
+PREDICTION_ERRORS_TOTAL = Counter(
+    "ml_prediction_errors_total",
+    "Nombre d'erreurs lors de la prédiction",
+    ["model_version"]
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -91,6 +105,7 @@ def predict(data: ClientData):
         prediction = model.predict(values)[0]
         probability = model.predict_proba(values)[0][1]
     except Exception as e:
+        PREDICTION_ERRORS_TOTAL.labels(model_version=MODEL_VERSION).inc()
         logger.error(
             "Prediction error: %s", e,
             extra={
@@ -104,6 +119,7 @@ def predict(data: ClientData):
     duration = time.time() - start
     label = "CHURN" if prediction == 1 else "NO_CHURN"
     response_time_ms = round(duration * 1000, 2)
+    PREDICTIONS_TOTAL.labels(prediction=label, model_version=MODEL_VERSION).inc()
 
     logger.info(
         "prediction=%s, probability=%.4f, duration=%.4fs",
