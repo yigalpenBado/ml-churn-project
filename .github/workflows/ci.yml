@@ -32,6 +32,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Tests
+      - name: Démarrage de l'API (environnement dev)
         run: |
-          python -m pytest
+          uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8000/health && break; sleep 1; done
+
+      - name: Tests (API + Selenium)
+        env:
+          APP_URL: http://localhost:8000
+        run: |
+          python -m pytest -v -rs
