@@ -1,3 +1,0 @@
-Libellé,# Echantillons,Moyenne,Médiane,90% centile,95% centile,99% centile,Min,Max,% Erreur,Débit,Ko/sec reçus,Ko/sec émis
-HTTP_PREDICT,5000,13367,14225,15998,16218,16620,25,17620,"0,000%","33,35023","6,88","10,26"
-TOTAL,5000,13367,14225,15998,16218,16620,25,17620,"0,000%","33,35023","6,88","10,26"
